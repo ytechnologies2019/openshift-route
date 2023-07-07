@@ -1,0 +1,17 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  creationTimestamp: null
+  labels:
+    app: my-nginx
+    app.kubernetes.io/component: my-nginx
+    app.kubernetes.io/instance: my-nginx
+  name: my-nginx
+spec:
+  port:
+    targetPort: 8080-tcp
+  to:
+    kind: ""
+    name: my-nginx
+    weight: null
+status: {}
