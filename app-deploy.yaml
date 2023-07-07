@@ -1,0 +1,132 @@
+apiVersion: v1
+items:
+- apiVersion: image.openshift.io/v1
+  kind: ImageStream
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+    creationTimestamp: null
+    labels:
+      app: my-nginx
+      app.kubernetes.io/component: my-nginx
+      app.kubernetes.io/instance: my-nginx
+    name: my-nginx
+  spec:
+    lookupPolicy:
+      local: false
+  status:
+    dockerImageRepository: ""
+- apiVersion: build.openshift.io/v1
+  kind: BuildConfig
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+    creationTimestamp: null
+    labels:
+      app: my-nginx
+      app.kubernetes.io/component: my-nginx
+      app.kubernetes.io/instance: my-nginx
+    name: my-nginx
+  spec:
+    nodeSelector: null
+    output:
+      to:
+        kind: ImageStreamTag
+        name: my-nginx:latest
+    postCommit: {}
+    resources: {}
+    source:
+      git:
+        uri: https://github.com/thiha-thura/nginx-testing-purpose.git
+      type: Git
+    strategy:
+      sourceStrategy:
+        from:
+          kind: ImageStreamTag
+          name: nginx:1.20-ubi8
+          namespace: openshift
+      type: Source
+    triggers:
+    - github:
+        secret: xLhCpcPIsHHz4u2GXQCO
+      type: GitHub
+    - generic:
+        secret: 7KcxnHlU2IawSzDM_Xpo
+      type: Generic
+    - type: ConfigChange
+    - imageChange: {}
+      type: ImageChange
+  status:
+    lastVersion: 0
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      image.openshift.io/triggers: '[{"from":{"kind":"ImageStreamTag","name":"my-nginx:latest"},"fieldPath":"spec.template.spec.containers[?(@.name==\"my-nginx\")].image"}]'
+      openshift.io/generated-by: OpenShiftNewApp
+    creationTimestamp: null
+    labels:
+      app: my-nginx
+      app.kubernetes.io/component: my-nginx
+      app.kubernetes.io/instance: my-nginx
+    name: my-nginx
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        deployment: my-nginx
+    strategy: {}
+    template:
+      metadata:
+        annotations:
+          openshift.io/generated-by: OpenShiftNewApp
+        creationTimestamp: null
+        labels:
+          deployment: my-nginx
+      spec:
+        containers:
+        - env:
+          - name: HTTPS_METHOD
+            value: noredirect
+          - name: NGINX_HTTPS_CERTIFICATE
+            value: /etc/nginx/ssl/nginx.crt
+          - name: NGINX_HTTPS_PRIVATE_KEY
+            value: /etc/nginx/ssl/nginx.key
+          - name: USE_SERVICE_MESH
+            value: "false"
+          image: ' '
+          name: my-nginx
+          ports:
+          - containerPort: 8080
+            protocol: TCP
+          - containerPort: 8443
+            protocol: TCP
+          resources: {}
+  status: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+    creationTimestamp: null
+    labels:
+      app: my-nginx
+      app.kubernetes.io/component: my-nginx
+      app.kubernetes.io/instance: my-nginx
+    name: my-nginx
+  spec:
+    ports:
+    - name: 8080-tcp
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+    - name: 8443-tcp
+      port: 8443
+      protocol: TCP
+      targetPort: 8443
+    selector:
+      deployment: my-nginx
+  status:
+    loadBalancer: {}
+kind: List
+metadata: {}
